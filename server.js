@@ -1,12 +1,12 @@
 require('dotenv').config();
 const http = require("http");
 const express = require("express");
-const { WebSocketServer } = require('ws');  
-const { GoogleGenAI } = require("@google/genai");
+const { WebSocketServer } = require('ws');  // this is connect to realtime communicate to client or server 
+const { GoogleGenAI } = require("@google/genai"); // use of AI model interact / import SDK
 
 const app = express();
-const server = http.createServer(app);
-const wss = new WebSocketServer({ server });
+const server = http.createServer(app); //integrate with Node.js HTTP server
+const wss = new WebSocketServer({ server }); // same use of websocket
 const PORT = 3000;
 
 app.use(express.static("public"));
@@ -21,7 +21,9 @@ async function callGeminiWithRetry(userText, retries = 5) {
         try {
             const response = await genAI.models.generateContent({
                 model: "gemini-2.5-flash",
-                contents: [{ role: "user", parts: [{ text: userText }] }]
+                contents: [
+                    { role: "user", //user input
+                      parts: [{ text: userText }] }] //parts:  Actual message  send to AI
             });
             return response;
         } catch (err) {
@@ -37,24 +39,24 @@ async function callGeminiWithRetry(userText, retries = 5) {
             }
         }
     }
-    throw new Error("❌ Gemini failed after retries");
+    throw new Error("❌ Gemini failed after retries"); //if after retries so throw the error msg
 }
 
-wss.on("connection", (ws) => {
+wss.on("connection", (ws) => { //jab client websocket se connect hoga toh yeh call hoga
     console.log("🔗 Client connected");
 
     ws.on("message", async (message) => {
         try {
-            const data = JSON.parse(message);
-            if (data.text) {
+            const data = JSON.parse(message); //msg JSON Parse because frontend send JSON data
+            if (data.text) { //if text field 
                 console.log("📝 Client text:", data.text);
-                const revoltMotorsPrompt = `You are an expert on Revolt Motors (electric bikes and motorcycles). Answer ONLY about Revolt Motors, their products, specs, and related info. Ignore all other topics. Question: ${data.text}`;
-                const response = await callGeminiWithRetry(revoltMotorsPrompt);
+                const revoltMotorsPrompt = `You are an expert on Revolt Motors (electric bikes and motorcycles). Answer ONLY about Revolt Motors, their products, specs, and related info. Ignore all other topics. Question: ${data.text}`;// field modify only share Revolt motors give the answer
+                const response = await callGeminiWithRetry(revoltMotorsPrompt); // only response send Revolt Motors related
                 const replyText = response.candidates?.[0]?.content?.parts?.[0]?.text || "⚠️ No response";
-                console.log("🤖 Gemini reply:", replyText);
+                console.log("🤖 Gemini reply:", replyText);// response stored in variable then console.log respose.
                 ws.send(JSON.stringify({ text: replyText }));
             }
-        } catch (err) {
+        } catch (err) { // if any error occur so catch block execute instantly
             console.error("❌ Error handling message:", err);
             ws.send(JSON.stringify({ error: "Processing failed" }));
         }
@@ -64,4 +66,4 @@ wss.on("connection", (ws) => {
     ws.on("error", (err) => console.error("⚠️ WebSocket Error", err));
 });
 
-server.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+server.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`)); //server listing to port
