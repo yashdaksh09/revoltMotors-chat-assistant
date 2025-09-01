@@ -14,8 +14,21 @@ startBtn.onclick = () => {
     ws.onopen = () => logMessage("Connected to server", "client"); // when connection is opened so log is connected server
     ws.onmessage = (event) => {  // jab server se koi reply aata hai JSON format main. agar data.txt hai toh log main print krta ha
         const data = JSON.parse(event.data);
-        if (data.text) logMessage(data.text, "bot");
+        if (data.text) {
+             const cleanReply = cleanText(data.text); 
+        logMessage(cleanReply, "bot");
+       speakText(cleanReply); //  bot ka answer voice mein bolna
+    }
     };
+
+    function speakText(text) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "hi-IN";   // Language set (chaaho toh 'hi-IN' bhi kar sakte ho)
+    utterance.rate = 1;         // Speed (1 = normal)
+    utterance.pitch = 1;        // Pitch (1 = normal)
+    speechSynthesis.speak(utterance);
+}
+
     ws.onclose = () => logMessage("Disconnected from server", "client");
 
     // Start Speech Recognition (browser built-in)
@@ -41,8 +54,14 @@ startBtn.onclick = () => {
     logMessage("🎤 Listening started...", "client");
 };
 
+function cleanText(text) {
+    // Markdown ke *, _, #, >, ` etc. hata do
+    return text.replace(/[*_#>`]/g, "").trim();
+}
+
 stopBtn.onclick = () => {
     recognition.stop();
+    speechSynthesis.cancel(); // AI ki voice stop krne ke liye jab stop button click hoga toh AI ki bhi voice bnd hogi ish function call se.
 };
  
 function logMessage(text, type) {

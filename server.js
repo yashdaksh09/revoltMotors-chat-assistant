@@ -50,7 +50,8 @@ wss.on("connection", (ws) => { //jab client websocket se connect hoga toh yeh ca
             const data = JSON.parse(message); //msg JSON Parse because frontend send JSON data
             if (data.text) { //if text field 
                 console.log("📝 Client text:", data.text);
-                const revoltMotorsPrompt = `You are an expert on Revolt Motors (electric bikes and motorcycles). Answer ONLY about Revolt Motors, their products, specs, and related info. Ignore all other topics. Question: ${data.text}`;// field modify only share Revolt motors give the answer
+                const revoltMotorsPrompt = `You are an expert on Revolt Motors (electric bikes and motorcycles). Answer ONLY about Revolt Motors, their products, specs, and related info. Ignore all other topics.Reply in the same language as the question. Question: ${data.text}`;// field modify only share Revolt motors give the answer
+                
                 const response = await callGeminiWithRetry(revoltMotorsPrompt); // only response send Revolt Motors related
                 const replyText = response.candidates?.[0]?.content?.parts?.[0]?.text || "⚠️ No response";
                 console.log("🤖 Gemini reply:", replyText);// response stored in variable then console.log respose.
