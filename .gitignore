@@ -1,0 +1,8 @@
+# Ignore node modules
+node_modules/
+
+# Env file
+.env
+
+# Ignore Google Cloud service account keys
+tokyo-nomad-470810-n6-08f48d163438.json
