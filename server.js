@@ -44,6 +44,10 @@ async function callGeminiWithRetry(userText, retries = 5) {
 
 wss.on("connection", (ws) => { //jab client websocket se connect hoga toh yeh call hoga
     console.log("🔗 Client connected");
+     ws.isAlive = true; 
+     ws.on('pong', () => {
+        ws.isAlive = true;
+    });
 
     ws.on("message", async (message) => {
         try {
@@ -62,6 +66,14 @@ wss.on("connection", (ws) => { //jab client websocket se connect hoga toh yeh ca
             ws.send(JSON.stringify({ error: "Processing failed" }));
         }
     });
+    const interval = setInterval(function ping() {
+    wss.clients.forEach(function each(ws) {
+        if (ws.isAlive === false) return ws.terminate();
+
+        ws.isAlive = false;
+        ws.ping();
+    });
+}, 30000);
 
     ws.on("close", () => console.log("❌ Client disconnected"));
     ws.on("error", (err) => console.error("⚠️ WebSocket Error", err));
