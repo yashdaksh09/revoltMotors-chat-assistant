@@ -9,7 +9,7 @@ startBtn.onclick = () => {
     startBtn.disabled = true;
     stopBtn.disabled = false; //stop button is triggred to disbale recording
 
-    ws = new WebSocket("ws://localhost:3000"); //Browser se server ke sath websocket connection open krna 
+    ws = new WebSocket("wss://revoltmotors-chat-assistant.onrender.com/"); //Browser se server ke sath websocket connection open krna 
 
     ws.onopen = () => logMessage("Connected to server", "client"); // when connection is opened so log is connected server
     ws.onmessage = (event) => {  // jab server se koi reply aata hai JSON format main. agar data.txt hai toh log main print krta ha
